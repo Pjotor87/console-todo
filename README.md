@@ -52,3 +52,5 @@ It's a .net core console app so just open the solution file with VS.
 Use release mode.
 
 Build it and grab it from the bin folder.
+
+Pass a single argument to it -> The path of a .txt file used as the database.
