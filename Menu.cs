@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace TODO
 {
@@ -50,33 +48,42 @@ namespace TODO
             return PrintMenuChoices(lines, idWrapColor, idColor, textColor, clearConsole, readKeyAtEnd, spacingCount);
         }
 
-        public static void WithCharChoices(IList<KeyValuePair<char, string>> choices, ConsoleColor idWrapColor = ConsoleColor.Gray, ConsoleColor idColor = ConsoleColor.White, ConsoleColor textColor = ConsoleColor.White, int spacingCount = 1, bool clearConsole = false, bool readKeyAtEnd = false)
+        public static void WithCharChoices(IList<KeyValuePair<char, string>> choices, ConsoleColor idWrapColor = ConsoleColor.Gray, ConsoleColor idColor = ConsoleColor.White, ConsoleColor textColor = ConsoleColor.White, int spacingCount = 1, bool clearConsole = false, bool readKeyAtEnd = false, bool printChoices = true)
         {
             foreach (var choice in choices)
-                PrintMenuChoice(choice.Key.ToString(), choice.Value, idWrapColor, idColor, textColor, spacingCount);
+                PrintMenuChoice(
+                    choice.Value, 
+                    printChoices ? choice.Key.ToString() : null, 
+                    idWrapColor,
+                    idColor,
+                    textColor,
+                    spacingCount);
         }
 
-        private static IDictionary<int, string> PrintMenuChoices(IList<string> menuChoices, ConsoleColor idWrapColor = ConsoleColor.Gray, ConsoleColor idColor = ConsoleColor.White, ConsoleColor textColor = ConsoleColor.White, bool clearConsole = false, bool readKeyAtEnd = false, int spacingCount = 1)
+        public static IDictionary<int, string> PrintMenuChoices(IList<string> menuChoices, ConsoleColor idWrapColor = ConsoleColor.Gray, ConsoleColor idColor = ConsoleColor.White, ConsoleColor textColor = ConsoleColor.White, bool clearConsole = false, bool readKeyAtEnd = false, int spacingCount = 1)
         {
             var dict = new Dictionary<int, string>();
             int counter = 1;
             foreach (var choiceText in menuChoices)
             {
-                PrintMenuChoice(counter.ToString(), choiceText, idWrapColor, idColor, textColor, spacingCount);
+                PrintMenuChoice(choiceText, counter.ToString(), idWrapColor, idColor, textColor, spacingCount);
                 dict.Add(counter++, choiceText);
             }
             return dict;
         }
 
-        private static void PrintMenuChoice(string id, string text, ConsoleColor idWrapColor = ConsoleColor.Gray, ConsoleColor idColor = ConsoleColor.White, ConsoleColor textColor = ConsoleColor.White, int spacingCount = 1)
+        public static void PrintMenuChoice(string text, string id = null, ConsoleColor idWrapColor = ConsoleColor.Gray, ConsoleColor idColor = ConsoleColor.White, ConsoleColor textColor = ConsoleColor.White, int spacingCount = 1)
         {
-            Console.ForegroundColor = idWrapColor;
-            Console.Write($"(");
-            Console.ForegroundColor = idColor;
-            Console.Write(id);
-            Console.ForegroundColor = idWrapColor;
-            Console.Write($")");
-            Console.Write(new string(' ', spacingCount));
+            if (!string.IsNullOrEmpty(id))
+            {
+                Console.ForegroundColor = idWrapColor;
+                Console.Write($"(");
+                Console.ForegroundColor = idColor;
+                Console.Write(id);
+                Console.ForegroundColor = idWrapColor;
+                Console.Write($")");
+                Console.Write(new string(' ', spacingCount));
+            }
             Console.ForegroundColor = textColor;
             Console.WriteLine(text);
             Console.ResetColor();

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace TODO
@@ -8,7 +7,7 @@ namespace TODO
     {
         public int Id { get; set; }
         public string Description { get; set; }
-        public Priority PriorityLevel { get; set; }
+        public PriorityLevel PriorityLevel { get; set; }
         public ConsoleColor Color { get; set; } = ConsoleColor.Gray;
 
         public override string ToString()
