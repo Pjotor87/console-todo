@@ -10,16 +10,30 @@ namespace TODO
     {
         static void Main(string[] args)
         {
-            string todoPath = args[0];
-
             bool debug = false;
 #if DEBUG
             debug = true;
-            if (File.Exists("todo.txt"))
-                File.Delete("todo.txt");
-            todoPath = "todo.txt";
 #endif
-            RunLoop(todoPath);
+
+            RunLoop(GetTodoPath(args, debug));
+        }
+
+        private static string GetTodoPath(string[] args, bool debug)
+        {
+            string todoPath = string.Empty;
+            if (debug)
+            {
+                string fileUsedWhenDebugging = "todo.txt";
+                if (File.Exists(fileUsedWhenDebugging))
+                    File.Delete(fileUsedWhenDebugging);
+                todoPath = fileUsedWhenDebugging;
+            }
+            else if (args != null)
+            {
+                todoPath = args[0];
+            }
+
+            return todoPath;
         }
 
         private static void RunLoop(string todoPath)

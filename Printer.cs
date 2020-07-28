@@ -1,5 +1,4 @@
-﻿using Printer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -45,7 +44,7 @@ namespace TODO
         {
             Console.Write($"(");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"{entry.Id}");
+            Console.Write($"{entry.Id}");
             Console.ResetColor();
             Console.Write($") ");
             Console.ForegroundColor = entry.Color;
