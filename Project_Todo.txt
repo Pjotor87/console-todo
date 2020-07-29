@@ -1,0 +1,8 @@
+Todo
+----
+- Refactor the Code
+- Clear using statements that are not in use
+- Run code analysis tool
+- Comment the code where needed
+- Document
+- Add tests
