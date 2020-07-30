@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Threading;
 
 namespace TODO
 {
@@ -58,91 +58,172 @@ namespace TODO
         {
             if (!exit)
             {
-                Console.Clear();
-                if (File.Exists(todoPath))
-                {
-                    var todos = ReadTodos(todoPath);
-                    PrintTodos(todos);
-                    Print.NewLine("\nWrite a new todo to add it. A number to edit. Just enter without typing anything to exit.", ConsoleColor.White);
+                var todoCollection = new TodoCollection(todoPath, false);
 
-                    string choice = Console.ReadLine();
-                    if (string.IsNullOrEmpty(choice))
-                        exit = true;
-                    else if (IsSelection(choice, todos))
-                        RunSelection(todoPath, todos, choice);
-                    else if (TodoExists(todos, choice))
-                        exit = false;
-                    else
-                    {
-                        todos.Add(new TodoEntry() { Description = choice, PriorityLevel = GetPriorityForNewEntry() });
-                        SaveTodos(todos, todoPath);
-                        exit = false;
-                    }
+                if (!todoCollection.DbExists())
+                {
+                    todoCollection.Initialize();
+                    exit = false;
                 }
                 else
                 {
-                    File.WriteAllText(todoPath, string.Empty, Encoding.Default);
-                    exit = false;
+                    Console.Clear();
+                    todoCollection.Load();
+                    OutputAppTitle("console-todo");
+                    todoCollection.OutputToConsole();
+                    Print.NewLine("\nWrite a new todo to add it. A number to edit. Just enter without typing anything to exit.\n", ConsoleColor.White);
+                    exit = GetMainMenuUserInput(todoCollection);
                 }
             }
 
             return !exit;
         }
 
-        private static void PrintTodos(IList<TodoEntry> todos)
+        private static void OutputAppTitle(string title)
         {
-            foreach (var priority in Priority.GetSortOrder())
+            var colors = new List<ConsoleColor>
             {
-                var todoEntries = todos.Where(x => x.PriorityLevel == priority).ToList();
-                if (todoEntries != null && todoEntries.Count > 0)
+                ConsoleColor.Red,
+                ConsoleColor.Green,
+                ConsoleColor.Yellow,
+                ConsoleColor.Blue,
+                ConsoleColor.Magenta,
+                ConsoleColor.Cyan,
+                ConsoleColor.White,
+                ConsoleColor.Gray
+            };
+            var titleColor = ConsoleColor.Cyan;
+            colors = colors.OrderBy(a => Guid.NewGuid()).ToList();
+            int colorCounter = 0;
+
+            int lineCount = 3;
+            int borderWidth = 2;
+            int leftRighttitlePadding = 2;
+            int lineLength = title.Length + (2 * borderWidth) + (2 * leftRighttitlePadding);
+            int totalCharCount = lineLength * lineCount;
+
+            bool titleLineSwitch = false;
+            char borderChar = '¤';
+            char paddingChar = ' ';
+            
+            int charCounter = 0;
+
+            for (int i = 0; i < totalCharCount; i++)
+            {
+                char charToPrint;
+                if (!titleLineSwitch)
+                    charToPrint = borderChar;
+                else
                 {
-                    Print.NewLine(priority.ToString(), Priority.GetColor(priority));
-                    foreach (var entry in todoEntries)
-                    {
-                        Menu.PrintMenuChoice(entry.Description, entry.Id.ToString());
-                    }
+                    if (charCounter < borderWidth)
+                        charToPrint = borderChar;
+                    else if (charCounter < borderWidth + leftRighttitlePadding)
+                        charToPrint = paddingChar;
+                    else if (charCounter < borderWidth + leftRighttitlePadding + title.Length)
+                        charToPrint = title[charCounter - leftRighttitlePadding - borderWidth];
+                    else if (charCounter < borderWidth + leftRighttitlePadding + title.Length + leftRighttitlePadding)
+                        charToPrint = paddingChar;
+                    else
+                        charToPrint = borderChar;
+                    charCounter++;
+                }
+
+                ConsoleColor charColor = charToPrint != borderChar ? titleColor : colors[colorCounter];
+                colorCounter = colorCounter == colors.Count - 1 ? 0 : colorCounter + 1;
+
+                bool newLine = i == totalCharCount - 1;
+                if (!newLine)
+                    for (int j = 1; j < lineCount; j++)
+                        if (i == (j * lineLength) - 1)
+                        {
+                            newLine = true;
+                            break;
+                        }
+                if (!newLine)
+                {
+                    Print.Line(charToPrint.ToString(), charColor);
+                }
+                else
+                {
+                    Print.NewLine(charToPrint.ToString(), charColor);
+                    titleLineSwitch = !titleLineSwitch;
                 }
             }
         }
 
-        private static void RunSelection(string todoPath, IList<TodoEntry> todos, string choice)
+        private static void MMM()
         {
-            var todoSelection = todos.Where(x => x.Id == Convert.ToInt32(choice)).Single();
-
             Console.Clear();
+            for (int i = 0; i < 50; i++)
+            {
+                OutputAppTitle("Multicolored menu mode activated!!! Here we go! Whooooooo!!!");
+                Thread.Sleep(100);
+            }
+        }
 
-            Print.Line($"You selected: ");
+        private static bool GetMainMenuUserInput(TodoCollection todoCollection)
+        {
+            bool exit = false;
+
+            string choice = Console.ReadLine();
+            if (string.IsNullOrEmpty(choice))
+                exit = true;
+            else if (todoCollection.IdExists(choice))
+                RunSelection(todoCollection, choice);
+            else if (!todoCollection.Exists(choice))
+            {
+                todoCollection.Add(new Todo() { Description = choice, PriorityLevel = GetPriorityForNewEntry(), Color = ConsoleColor.White });
+                todoCollection.Save();
+            }
+            else if (choice == "mmm")
+                MMM();
+
+            return exit;
+        }
+
+        private static void RunSelection(TodoCollection todoCollection, string choice)
+        {
+            var todoSelection = todoCollection.FindById(choice);
+
+            Print.Line($"You selected: ", clearConsole: true);
             Print.NewLine(todoSelection.Description, todoSelection.Color);
             Print.Line($"Priority level is: ");
             Print.NewLine(todoSelection.PriorityLevel.ToString(), Priority.GetColor(todoSelection.PriorityLevel));
 
-            var menu = new List<KeyValuePair<char, string>>() {
-                new KeyValuePair<char, string>('d', "(D)escription edit"),
-                new KeyValuePair<char, string>('p', "(P)riority edit"),
-                new KeyValuePair<char, string>('r', "(R)emove"),
-            };
-            Menu.WithCharChoices(menu, printChoices: false);
-            Print.NewLine("\nPlease make a selection. Just enter without typing anything will abort.");
-            string modify = Menu.GetUserInput(menu.Select(x => x.Key).ToList()).ToString().ToLower();
-
-            if (modify == menu[0].Key.ToString()) // d
+            var menu = new CharConsoleMenu()
             {
-                string newDescription = GetNewDescription(todoSelection, todos);
+                Choices = new List<KeyValuePair<string, string>>()
+                {
+                    new KeyValuePair<string, string>("d", "escription edit"),
+                    new KeyValuePair<string, string>("p", "riority edit"),
+                    new KeyValuePair<string, string>("r", "emove")
+                },
+                SpacingCount = 0,
+                IdWrapColor = ConsoleColor.Yellow,
+                TextColor = ConsoleColor.Blue
+            };
+
+            menu.OutputToConsole("Please make a selection", ConsoleColor.Green);
+            string modify = menu.GetUserInput().ToLower();
+
+            if (modify == menu.Choices[0].Key.ToString()) // d
+            {
+                string newDescription = GetNewDescription(todoSelection, todoCollection);
                 if (!string.IsNullOrEmpty(newDescription))
                 {
-                    UpdateTodo(todos, todoSelection, new TodoEntry() { Description = newDescription, PriorityLevel = todoSelection.PriorityLevel });
-                    SaveTodos(todos, todoPath);
+                    todoCollection.Update(todoSelection, new Todo() { Description = newDescription, PriorityLevel = todoSelection.PriorityLevel });
+                    todoCollection.Save();
                 }
             }
-            else if (modify == menu[1].Key.ToString()) // p
+            else if (modify == menu.Choices[1].Key.ToString()) // p
             {
-                UpdateTodo(todos, todoSelection, new TodoEntry() { Description = todoSelection.Description, PriorityLevel = GetPriorityForNewEntry() });
-                SaveTodos(todos, todoPath);
+                todoCollection.Update(todoSelection, new Todo() { Description = todoSelection.Description, PriorityLevel = GetPriorityForNewEntry() });
+                todoCollection.Save();
             }
-            else if (modify == menu[2].Key.ToString()) // r
+            else if (modify == menu.Choices[2].Key.ToString()) // r
             {
-                todos.Remove(todoSelection);
-                SaveTodos(todos, todoPath);
+                todoCollection.Remove(todoSelection);
+                todoCollection.Save();
             }
         }
 
@@ -152,20 +233,16 @@ namespace TODO
         {
             var priority = PriorityLevel.None;
 
-            var priorities = Enum.GetNames(typeof(PriorityLevel)).ToList();
-            
-            int counter = 1;
-            foreach (var item in priorities)
-                Console.WriteLine($"({counter++}) {item}");
-
-            Console.WriteLine($"Select priority level. Anything not in the list will select None.");
-            string selection = Console.ReadKey().KeyChar.ToString();
-            if (IsNumeric(selection.ToString()))
+            var menu = new CharConsoleMenu();
+            menu.TextColor = ConsoleColor.Yellow;
+            menu.SetNumberedChoices(Enum.GetNames(typeof(PriorityLevel)).ToList());
+            menu.OutputToConsole(
+                afterMessage: "Just pressing enter will select None.", 
+                beforeMessage: "Select priority level", beforeMessageColor: ConsoleColor.Green);
+            var selection = menu.GetUserInput();
             {
-                int selectionAsInt = Convert.ToInt32(selection);
-                for (int i = 0; i < priorities.Count; i++)
-                    if (i + 1 == selectionAsInt)
-                        Enum.TryParse(priorities[i], out priority);
+                if (selection != '\r'.ToString())
+                    Enum.TryParse(menu.Choices.Where(x => x.Key == selection).Single().Value, out priority);
             }
 
             return priority;
@@ -173,91 +250,19 @@ namespace TODO
 
         #region Modify item
 
-        private static string GetNewDescription(TodoEntry todoSelection, IList<TodoEntry> todos)
+        private static string GetNewDescription(Todo todoSelection, TodoCollection todoCollection)
         {
             Print.NewLine("\nWrite a new description for this todo. Just enter without typing anything will exit.");
             string newDescription = Console.ReadLine();
-            if (!string.IsNullOrEmpty(newDescription) && TodoExists(todos, newDescription))
+            if (!string.IsNullOrEmpty(newDescription) && todoCollection.Exists(newDescription))
             {
                 Print.NewLine("The entry already exists. Try again.", ConsoleColor.Red);
-                return GetNewDescription(todoSelection, todos);
+                return GetNewDescription(todoSelection, todoCollection);
             }
             return newDescription;
         }
 
-        private static void UpdateTodo(IList<TodoEntry> todos, TodoEntry oldTodo, TodoEntry newTodo)
-        {
-            todos.Add(newTodo);
-            todos.Remove(oldTodo);
-        }
-
         #endregion
-
-        #endregion
-
-        #region Read and Save
-
-        private static IList<TodoEntry> ReadTodos(string todoPath)
-        {
-            var todos = new List<TodoEntry>();
-
-            IList<string> todoLines = File.ReadAllLines(todoPath, Encoding.Default);
-            int counter = 1;
-
-            foreach (var item in todoLines)
-                if (!string.IsNullOrEmpty(item) && item.Contains(','))
-                {
-                    var priorityTemp = PriorityLevel.None;
-                    Enum.TryParse(item.Split(',')[1], out priorityTemp);
-                    todos.Add(new TodoEntry() { Id = counter, Description = item.Split(',')[0], PriorityLevel = priorityTemp });
-                    counter++;
-                }
-
-            return todos;
-        }
-
-        private static void SaveTodos(IList<TodoEntry> todosToSave, string todoPath)
-        {
-            if (File.Exists(todoPath))
-            {
-                todosToSave = todosToSave.OrderBy(x => x.PriorityLevel).ToList();
-
-                var newLines = new List<string>();
-                foreach (var item in todosToSave)
-                {
-                    newLines.Add(item.ToString());
-                }
-                File.WriteAllLines(todoPath, newLines, Encoding.Default);
-            }
-        }
-
-        #endregion
-
-        #region Validation
-
-        private static bool IsNumeric(string str)
-        {
-            int isNumeric;
-            return int.TryParse(str, out isNumeric);
-        }
-
-        private static bool IsSelection(string choice, IList<TodoEntry> todos)
-        {
-            if (IsNumeric(choice))
-            {
-                int selection = Convert.ToInt32(choice);
-                if (todos.Where(x => x.Id == selection).SingleOrDefault() != null)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private static bool TodoExists(IList<TodoEntry> todos, string newDescription)
-        {
-            return todos.Where(x => x.Description == newDescription).SingleOrDefault() != null;
-        }
 
         #endregion
     }

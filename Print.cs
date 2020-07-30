@@ -12,10 +12,10 @@ namespace TODO
 
         public static void Lines(IEnumerable<string> lines, ConsoleColor color = ConsoleColor.Gray, bool clearConsole = false, bool readKeyAtEnd = false)
         {
-            WriteColoredLines(lines, color, readKeyAtEnd, readKeyAtEnd: clearConsole);
+            WriteColoredLines(lines, color, false, clearConsole, readKeyAtEnd);
         }
 
-        public static void NewLine(string line, ConsoleColor color = ConsoleColor.Gray, bool clearConsole = false, bool readKeyAtEnd = false)
+        public static void NewLine(string line = null, ConsoleColor color = ConsoleColor.Gray, bool clearConsole = false, bool readKeyAtEnd = false)
         {
             NewLines(new string[] { line }, color, clearConsole, readKeyAtEnd);
         }
