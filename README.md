@@ -1,6 +1,6 @@
 # console-todo
 
-[![Demo](https://img.youtube.com/vi/G27zzyAZEsE/0.jpg)](https://www.youtube.com/watch?v=G27zzyAZEsE)
+[![Demo](/_docs/YtScreenshot.png)](//www.youtube.com/watch?v=G27zzyAZEsE)
 
 It's a LIGHTWEIGHT todo application based on REVOLUTIONARY console "looping" technology.
 
