@@ -1,32 +1,39 @@
 # console-todo
+[![Demo](/_docs/YtScreenshot.png)](//www.youtube.com/watch?v=G27zzyAZEsE)
 
-[![Demo](https://img.youtube.com/vi/G27zzyAZEsE/0.jpg)](https://www.youtube.com/watch?v=G27zzyAZEsE)
+<p align="center">△</p>
 
-It's a LIGHTWEIGHT todo application based on REVOLUTIONARY console "looping" technology.
+<p align="center">Do you have dreams??</p>
 
-You heard right. It runs IN THE CONSOLE!
+<p align="center">I know I do.</p>
 
-Big data clusters? Maybe.
+<p align="center">That is why this LIGHTWEIGHT todo application was made.</p>
 
-Internet of things? If you want. Why not?
+<p align="center">Based on REVOLUTIONARY console "looping" technology!</p>
 
-QUESTION!
+<p align="center">You heard right. It runs IN THE CONSOLE!</p>
 
-Have you ever been at the office. And Lisa from the cubicle next to yours comes by for a thing and glances over at your screen. She sees your bland black and white todo list and thinks to herself, "Oh no! This guy is not marriage material at all!"
+<p align="center">Big data clusters? Maybe.</p>
 
-Well let me first tell you this.
+<p align="center">Internet of things? If you want. Why not?</p>
 
-YOU ARE NOT ALONE!
+<p align="center">QUESTION!</p>
 
-That is why so much heart and effort went into the creation of the new "Multicolored menus" feature.
+<p align="center">Have you ever been at the office. And Lisa from the cubicle next to yours comes by for a thing and glances over at your screen. She sees your bland black and white todo list and thinks to herself, "Oh no! This guy is not marriage material at all!"</p>
 
-Allow me to explain.
+<p align="center">Well let me first tell you this.</p>
 
-THIS IS NOT A PYRAMID SCHEME!
+<p align="center">YOU ARE NOT ALONE!</p>
 
-Six carefully handpicked colors are "output" to the console to bring delight to our eyes.
+<p align="center">That is why so much heart and effort went into the creation of the new "Multicolored menus" feature.</p>
 
-Next time Lisa takes a look at your screen and sees this work of art running well... I don't want to promise too much, but... I myself am happily married for 93 years now and still going strong. Let's just leave it at that ;) Wink!
+<p align="center">Allow me to explain.</p>
+
+<p align="center">△ THIS IS NOT A PYRAMID SCHEME! △</p>
+
+<p align="center">Six carefully handpicked colors are "output" to the console to bring delight to our eyes.</p>
+
+<p align="center">Next time Lisa takes a look at your screen and sees this work of art running well... I don't want to promise too much, but... I myself am happily married for 93 years now and still going strong. Let's just leave it at that ;) Wink!</p>
 
 # Key Features
 Multicolored menus!
