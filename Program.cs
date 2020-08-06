@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 
 namespace TODO
 {
     class Program
     {
+        private static string DefaultDbPath = new Uri(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetName().CodeBase), "todo.txt")).AbsolutePath.ToString();
+
         static void Main(string[] args)
         {
             bool debug = false;
@@ -22,14 +26,17 @@ namespace TODO
             string todoPath = string.Empty;
             if (debug)
             {
-                string fileUsedWhenDebugging = "todo.txt";
+                string fileUsedWhenDebugging = DefaultDbPath;
                 if (File.Exists(fileUsedWhenDebugging))
                     File.Delete(fileUsedWhenDebugging);
                 todoPath = fileUsedWhenDebugging;
             }
             else if (args != null)
             {
-                todoPath = args[0];
+                if (args.Length > 0)
+                    todoPath = args[0];
+                else if (File.Exists(DefaultDbPath))
+                    todoPath = DefaultDbPath;
             }
 
             return todoPath;
@@ -50,7 +57,29 @@ namespace TODO
                 Print.NewLines(new string[] {
                     "This program requires one argument passed to it.",
                     "Pass a path to an empty .txt file, then try running the program again."
+                }, ConsoleColor.Red);
+                var menu = new CharConsoleMenu()
+                {
+                    Choices = new List<KeyValuePair<string, string>>()
+                    {
+                        new KeyValuePair<string, string>("y", "es"),
+                        new KeyValuePair<string, string>("n", "o")
+                    },
+                    SpacingCount = 0,
+                    IdWrapColor = ConsoleColor.Cyan
+                };
+                Print.NewLines(new string[] {
+                    "Or, would you like to create a new db at the following path",
+                    DefaultDbPath,
+                    "?"
                 }, ConsoleColor.Yellow);
+                menu.OutputToConsole(skipBeforeMessage: true);
+                string choice = menu.GetUserInput().ToLower();
+                if (choice == "y")
+                {
+                    File.WriteAllText(DefaultDbPath, string.Empty, Encoding.Default);
+                    RunLoop(DefaultDbPath);
+                }
             }
         }
 
