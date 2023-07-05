@@ -24,20 +24,23 @@ namespace TODO
                 this.Choices.Add(new KeyValuePair<string, string>(counter++.ToString(), choice));
         }
 
-        public virtual void OutputToConsole(string beforeMessage = null, ConsoleColor beforeMessageColor = ConsoleColor.Gray, string afterMessage = null, ConsoleColor afterMessageColor = ConsoleColor.Gray, bool skipBeforeMessage = false, bool skipAfterMessage = false)
+        public virtual void OutputToConsole(string beforeMessage = null, ConsoleColor beforeMessageColor = ConsoleColor.Gray, string afterMessage = null, ConsoleColor afterMessageColor = ConsoleColor.Gray, bool skipBeforeMessage = false, bool skipAfterMessage = false, Action customChoicesOutputFunction = null)
         {
-            if (!skipBeforeMessage && this.Choices != null && this.Choices.Count > 0)
+            if ((!skipBeforeMessage && !string.IsNullOrEmpty(beforeMessage)) || (this.Choices != null && this.Choices.Count > 0))
             {
                 Print.NewLine();
                 Print.NewLine(!string.IsNullOrEmpty(beforeMessage) ? beforeMessage : "Menu\n----", beforeMessageColor);
             }
 
-            foreach (var choice in this.Choices)
-                OutputMenuChoiceToConsole(
-                    choice.Value,
-                    this.PrintChoices ? choice.Key.ToString() : null);
+            if (customChoicesOutputFunction != null)
+                customChoicesOutputFunction.Invoke();
+            else
+                foreach (var choice in this.Choices)
+                    OutputMenuChoiceToConsole(
+                        choice.Value,
+                        this.PrintChoices ? choice.Key.ToString() : null);
 
-            if (!skipAfterMessage && this.Choices != null && this.Choices.Count > 0)
+            if ((!skipAfterMessage && !string.IsNullOrEmpty(afterMessage)) || (this.Choices != null && this.Choices.Count > 0))
             {
                 Print.NewLine();
                 Print.NewLine(!string.IsNullOrEmpty(afterMessage) ? afterMessage : "Please make a selection. Just enter without typing anything will abort.", afterMessageColor);
@@ -54,6 +57,28 @@ namespace TODO
                 {
                     if (string.IsNullOrEmpty(userInput) || // Enter keypress
                         this.ValidInputs.Contains(userInput))
+                        break;
+                    else
+                        Console.WriteLine("Not a valid input. Please try again.");
+                }
+                else
+                    break;
+            } while (true);
+
+            return userInput;
+        }
+
+        public virtual string GetNumericUserInput(bool allowDouble = false)
+        {
+            string userInput;
+            do
+            {
+                userInput = Console.ReadLine();
+                if (this.ValidInputs != null)
+                {
+                    if (string.IsNullOrEmpty(userInput) || // Enter keypress
+                        int.TryParse(userInput, out int _) ||
+                        allowDouble && double.TryParse(userInput, out double _))
                         break;
                 }
                 else
