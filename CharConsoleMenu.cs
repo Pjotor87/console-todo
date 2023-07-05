@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace TODO
 {
@@ -28,6 +25,8 @@ namespace TODO
                 else
                     break;
             } while (true);
+
+            Console.WriteLine();
 
             return userInput.ToString();
         }
